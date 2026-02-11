@@ -8,6 +8,7 @@ import ClientManager from './components/ClientManager';
 import Dashboard from './components/Dashboard';
 import PriceManager from './components/PriceManager';
 import SettingsManager from './components/SettingsManager';
+import ImageUpload from './components/ImageUpload';
 import {
   ArrowLeft,
   Eye,
@@ -470,37 +471,17 @@ export default function App() {
                   <ImageIcon className="text-primary w-6 h-6" />
                   <h3 className="text-[#151316] text-lg font-bold">Imagens e Branding</h3>
                 </div>
-                <div className="grid grid-cols-1 gap-4">
-                  <label className="flex flex-col flex-1">
-                    <div className="flex items-center justify-between pb-2">
-                      <p className="text-[#151316] text-sm font-medium">Link do Logo (URL)</p>
-                      <span className="text-xs text-primary bg-primary/10 px-2 py-0.5 rounded-full font-medium">Link Direto</span>
-                    </div>
-                    <div className="relative">
-                      <LinkIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                      <input
-                        className="flex w-full rounded-lg text-[#151316] focus:outline-0 focus:ring-2 focus:ring-primary/20 border border-primary/20 bg-white focus:border-primary h-12 pl-12 pr-4 text-base font-normal placeholder-gray-400 transition-shadow"
-                        placeholder="https://suaempresa.com/logo.png"
-                        value={editorData.logoUrl}
-                        onChange={(e) => updateEditorField('logoUrl', e.target.value)}
-                      />
-                    </div>
-                  </label>
-                  <label className="flex flex-col flex-1">
-                    <div className="flex items-center justify-between pb-2">
-                      <p className="text-[#151316] text-sm font-medium">Link da Capa (Opcional)</p>
-                      <span className="text-xs text-primary bg-primary/10 px-2 py-0.5 rounded-full font-medium">Link Direto</span>
-                    </div>
-                    <div className="relative">
-                      <LinkIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                      <input
-                        className="flex w-full rounded-lg text-[#151316] focus:outline-0 focus:ring-2 focus:ring-primary/20 border border-primary/20 bg-white focus:border-primary h-12 pl-12 pr-4 text-base font-normal placeholder-gray-400 transition-shadow"
-                        placeholder="https://exemplo.com/banner.jpg"
-                        value={editorData.coverUrl}
-                        onChange={(e) => updateEditorField('coverUrl', e.target.value)}
-                      />
-                    </div>
-                  </label>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <ImageUpload
+                    label="Logo do Projeto"
+                    currentUrl={editorData.logoUrl}
+                    onUpload={(url) => updateEditorField('logoUrl', url)}
+                  />
+                  <ImageUpload
+                    label="Imagem de Capa (Opcional)"
+                    currentUrl={editorData.coverUrl}
+                    onUpload={(url) => updateEditorField('coverUrl', url)}
+                  />
                 </div>
               </section>
 

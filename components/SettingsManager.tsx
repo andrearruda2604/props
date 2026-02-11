@@ -1,6 +1,7 @@
 import React from 'react';
 import { CompanySettings } from '../types';
 import { Save, Palette, FileText, Building2, UserCircle } from 'lucide-react';
+import ImageUpload from './ImageUpload';
 
 interface SettingsManagerProps {
   settings: CompanySettings;
@@ -41,7 +42,7 @@ const SettingsManager: React.FC<SettingsManagerProps> = ({ settings, onSave }) =
           <Palette className="text-primary" size={24} />
           <h3 className="font-bold text-lg text-gray-800">Identidade Visual</h3>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-2">Cor Principal (Tema)</label>
@@ -58,8 +59,8 @@ const SettingsManager: React.FC<SettingsManagerProps> = ({ settings, onSave }) =
           </div>
 
           <div>
-             <label className="block text-sm font-bold text-gray-700 mb-2">Nome da Empresa</label>
-             <input
+            <label className="block text-sm font-bold text-gray-700 mb-2">Nome da Empresa</label>
+            <input
               className="w-full p-3 rounded-lg border focus:ring-2 ring-primary/20 outline-none"
               value={localSettings.companyName}
               onChange={(e) => handleChange('companyName', e.target.value)}
@@ -68,20 +69,11 @@ const SettingsManager: React.FC<SettingsManagerProps> = ({ settings, onSave }) =
           </div>
 
           <div className="md:col-span-2">
-            <label className="block text-sm font-bold text-gray-700 mb-2">URL do Logo Padrão</label>
-            <div className="flex gap-4 items-center">
-              <input
-                className="flex-1 p-3 rounded-lg border focus:ring-2 ring-primary/20 outline-none"
-                value={localSettings.logoUrl}
-                onChange={(e) => handleChange('logoUrl', e.target.value)}
-                placeholder="https://..."
-              />
-              {localSettings.logoUrl && (
-                <div className="h-12 w-12 bg-gray-50 rounded border flex items-center justify-center overflow-hidden">
-                  <img src={localSettings.logoUrl} alt="Preview" className="max-w-full max-h-full" />
-                </div>
-              )}
-            </div>
+            <ImageUpload
+              label="Logo da Empresa"
+              currentUrl={localSettings.logoUrl}
+              onUpload={(url) => handleChange('logoUrl', url)}
+            />
           </div>
         </div>
       </section>
@@ -92,7 +84,7 @@ const SettingsManager: React.FC<SettingsManagerProps> = ({ settings, onSave }) =
           <FileText className="text-primary" size={24} />
           <h3 className="font-bold text-lg text-gray-800">Textos Padrão (Templates)</h3>
         </div>
-        
+
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-2">Escopo Padrão</label>
@@ -132,35 +124,35 @@ const SettingsManager: React.FC<SettingsManagerProps> = ({ settings, onSave }) =
           <UserCircle className="text-primary" size={24} />
           <h3 className="font-bold text-lg text-gray-800">Rodapé e Contato Padrão</h3>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-             <label className="block text-sm font-bold text-gray-700 mb-2">Nome do Responsável</label>
-             <input
+            <label className="block text-sm font-bold text-gray-700 mb-2">Nome do Responsável</label>
+            <input
               className="w-full p-3 rounded-lg border focus:ring-2 ring-primary/20 outline-none"
               value={localSettings.defaultContactName}
               onChange={(e) => handleChange('defaultContactName', e.target.value)}
             />
           </div>
           <div>
-             <label className="block text-sm font-bold text-gray-700 mb-2">Cargo</label>
-             <input
+            <label className="block text-sm font-bold text-gray-700 mb-2">Cargo</label>
+            <input
               className="w-full p-3 rounded-lg border focus:ring-2 ring-primary/20 outline-none"
               value={localSettings.defaultContactRole}
               onChange={(e) => handleChange('defaultContactRole', e.target.value)}
             />
           </div>
           <div>
-             <label className="block text-sm font-bold text-gray-700 mb-2">Telefone</label>
-             <input
+            <label className="block text-sm font-bold text-gray-700 mb-2">Telefone</label>
+            <input
               className="w-full p-3 rounded-lg border focus:ring-2 ring-primary/20 outline-none"
               value={localSettings.defaultContactPhone}
               onChange={(e) => handleChange('defaultContactPhone', e.target.value)}
             />
           </div>
           <div>
-             <label className="block text-sm font-bold text-gray-700 mb-2">Website</label>
-             <input
+            <label className="block text-sm font-bold text-gray-700 mb-2">Website</label>
+            <input
               className="w-full p-3 rounded-lg border focus:ring-2 ring-primary/20 outline-none"
               value={localSettings.defaultContactWebsite}
               onChange={(e) => handleChange('defaultContactWebsite', e.target.value)}
