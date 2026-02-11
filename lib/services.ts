@@ -154,9 +154,9 @@ export const SettingsService = {
         const { data, error } = await supabase
             .from('company_settings')
             .select('*')
-            .single(); // Returns null if no rows found
+            .maybeSingle();
 
-        if (error && error.code !== 'PGRST116') throw error; // PGRST116 is "Row not found"
+        if (error) throw error;
 
         if (!data) return null;
 
