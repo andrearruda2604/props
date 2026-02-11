@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { GoogleGenAI } from "@google/genai";
 import { ProposalData, INITIAL_DATA, Client, ProposalStatus, PriceItem, INITIAL_PRICES, CompanySettings, INITIAL_SETTINGS } from './types';
 import TimelineEditor from './components/TimelineEditor';
@@ -61,10 +61,14 @@ export default function App() {
   const [settings, setSettings] = useState<CompanySettings>(INITIAL_SETTINGS);
   const [loadingData, setLoadingData] = useState(true);
 
+  // Fetch Guard
+  const fetchedForUserId = useRef<string | null>(null);
+
   // Fetch Data on Session Change
   useEffect(() => {
-    if (session) {
+    if (session?.user?.id && session.user.id !== fetchedForUserId.current) {
       const fetchData = async () => {
+        fetchedForUserId.current = session.user.id;
         setLoadingData(true);
         try {
           const [clientsData, proposalsData, pricesData, settingsData] = await Promise.all([
@@ -80,6 +84,8 @@ export default function App() {
           if (settingsData) setSettings(settingsData);
         } catch (error) {
           console.error("Error fetching data:", error);
+          // Allow retrying on error? For now, let's keep it safe.
+          // If we want to retry, we'd reset the ref, but that risks loop if error persists.
         } finally {
           setLoadingData(false);
         }
