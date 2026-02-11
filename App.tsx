@@ -8,34 +8,88 @@ import ClientManager from './components/ClientManager';
 import Dashboard from './components/Dashboard';
 import PriceManager from './components/PriceManager';
 import SettingsManager from './components/SettingsManager';
-import { 
-  ArrowLeft, 
-  Eye, 
-  FileText, 
-  Layout, 
-  DollarSign, 
-  CreditCard, 
-  UserSquare2, 
-  Link as LinkIcon, 
+import {
+  ArrowLeft,
+  Eye,
+  FileText,
+  Layout,
+  DollarSign,
+  CreditCard,
+  UserSquare2,
+  Link as LinkIcon,
   Image as ImageIcon,
   Save,
   Sparkles,
   Timer,
   ShieldCheck,
   Loader2,
-  Users
+  Users,
+  LogOut
 } from 'lucide-react';
+import Auth from './components/Auth';
+import { supabase } from './lib/supabase';
+import { Session } from '@supabase/supabase-js';
+import { ClientService, ProposalService, PriceService, SettingsService } from './lib/services';
 
 export default function App() {
+  const [session, setSession] = useState<Session | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  if (!session) {
+    return <Auth />;
+  }
+
+
   // Navigation State
   const [currentView, setCurrentView] = useState<'dashboard' | 'clients' | 'editor' | 'prices' | 'settings'>('dashboard');
 
   // Data State
   const [clients, setClients] = useState<Client[]>([]);
-  const [proposals, setProposals] = useState<ProposalData[]>([INITIAL_DATA]);
-  const [priceList, setPriceList] = useState<PriceItem[]>(INITIAL_PRICES);
+  const [proposals, setProposals] = useState<ProposalData[]>([]);
+  const [priceList, setPriceList] = useState<PriceItem[]>([]);
   const [settings, setSettings] = useState<CompanySettings>(INITIAL_SETTINGS);
-  
+  const [loadingData, setLoadingData] = useState(true);
+
+  // Fetch Data on Session Change
+  useEffect(() => {
+    if (session) {
+      const fetchData = async () => {
+        setLoadingData(true);
+        try {
+          const [clientsData, proposalsData, pricesData, settingsData] = await Promise.all([
+            ClientService.getAll(),
+            ProposalService.getAll(),
+            PriceService.getAll(),
+            SettingsService.get()
+          ]);
+
+          setClients(clientsData);
+          setProposals(proposalsData);
+          setPriceList(pricesData);
+          if (settingsData) setSettings(settingsData);
+        } catch (error) {
+          console.error("Error fetching data:", error);
+        } finally {
+          setLoadingData(false);
+        }
+      };
+      fetchData();
+    }
+  }, [session]);
+
   // Editor State
   const [editorData, setEditorData] = useState<ProposalData>(INITIAL_DATA);
   const [showPreview, setShowPreview] = useState(false);
@@ -57,7 +111,7 @@ export default function App() {
       // Reset editor for new proposal with company defaults
       setEditorData({
         ...INITIAL_DATA,
-        id: Math.random().toString(36).substr(2, 9),
+        id: '', // Empty ID indicates new proposal
         createdAt: new Date().toISOString(),
         status: 'Rascunho',
         number: getNextProposalNumber(),
@@ -80,26 +134,75 @@ export default function App() {
     setCurrentView('editor');
   };
 
-  const handleSaveProposal = () => {
-    setProposals(prev => {
-      const exists = prev.find(p => p.id === editorData.id);
-      if (exists) {
-        return prev.map(p => p.id === editorData.id ? editorData : p);
+  const handleSaveProposal = async () => {
+    try {
+      if (editorData.createdAt === INITIAL_DATA.createdAt && !editorData.id) {
+        // Should not happen as we set ID in handleNavigate
       }
-      return [editorData, ...prev];
-    });
-    // Return to dashboard after save
-    setCurrentView('dashboard');
-  };
 
-  const handleDeleteProposal = (id: string) => {
-    if (confirm('Tem certeza que deseja excluir esta proposta?')) {
-      setProposals(prev => prev.filter(p => p.id !== id));
+      const exists = proposals.find(p => p.id === editorData.id);
+
+      let savedProposal: ProposalData;
+
+      // Preparing data for DB (removing id for create if needed, but we generate UUIDs in frontend or DB?
+      // The service expects Omit<ProposalData, 'id'> for create, but we generated a random ID in handleNavigate.
+      // We should probably let Supabase generate IDs or use UUIDs.
+      // For now, let's assume we use the ID we generated if it's a valid UUID, but Math.random is not.
+      // Let's rely on Service to handle ID generation or use a UUID library.
+      // Since I don't have uuid lib installed, I will change the logic to NOT generate ID in handleNavigate
+      // and let the backend generate it, OR I will continue to use the ID if we strictly use UUIDs.
+      // The SQL uses `default uuid_generate_v4()`.
+
+      // FIX: handleNavigate sets a random ID. This will fail UUID validation in Postgres.
+      // I should update handleNavigate to NOT set ID or set null/undefined.
+
+      const proposalToSave = { ...editorData };
+
+      if (exists) {
+        await ProposalService.update(editorData.id, proposalToSave);
+        savedProposal = editorData; // Optimistic update or use return from service
+      } else {
+        // It's a new proposal. The ID 'random...' is invalid.
+        // We need to remove ID and let Supabase generate it.
+        const { id, ...newProposal } = proposalToSave;
+        const created = await ProposalService.create(newProposal);
+        savedProposal = created;
+      }
+
+      setProposals(prev => {
+        if (exists) {
+          return prev.map(p => p.id === savedProposal.id ? savedProposal : p);
+        }
+        return [savedProposal, ...prev];
+      });
+
+      // Return to dashboard after save
+      setCurrentView('dashboard');
+    } catch (error) {
+      console.error("Error saving proposal:", error);
+      alert("Erro ao salvar proposta.");
     }
   };
 
-  const handleUpdateStatus = (id: string, status: ProposalStatus) => {
-    setProposals(prev => prev.map(p => p.id === id ? { ...p, status } : p));
+  const handleDeleteProposal = async (id: string) => {
+    if (confirm('Tem certeza que deseja excluir esta proposta?')) {
+      try {
+        await ProposalService.delete(id);
+        setProposals(prev => prev.filter(p => p.id !== id));
+      } catch (error) {
+        console.error("Error deleting proposal:", error);
+        alert("Erro ao excluir proposta.");
+      }
+    }
+  };
+
+  const handleUpdateStatus = async (id: string, status: ProposalStatus) => {
+    try {
+      await ProposalService.update(id, { status });
+      setProposals(prev => prev.map(p => p.id === id ? { ...p, status } : p));
+    } catch (error) {
+      console.error("Error updating status:", error);
+    }
   };
 
   const handleSelectClient = (client: Client) => {
@@ -137,7 +240,7 @@ export default function App() {
         model: 'gemini-3-flash-preview',
         contents: `Escreva uma descrição de escopo de projeto comercial profissional, detalhada e persuasiva para um projeto com o título: "${editorData.title}". Foque nos entregáveis e valor agregado. Limite a 3 parágrafos.`,
       });
-      
+
       if (response.text) {
         updateEditorField('description', response.text);
       }
@@ -149,43 +252,93 @@ export default function App() {
     }
   };
 
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+  };
+
   return (
     // Inject dynamic CSS variable for primary color
-    <div 
+    <div
       className="flex flex-col md:flex-row min-h-screen bg-background-light"
       style={{ '--color-primary': settings.primaryColor } as React.CSSProperties}
     >
-      <Sidebar currentView={currentView} onNavigate={handleNavigate} />
-      
+      <Sidebar
+        currentView={currentView}
+        onNavigate={handleNavigate}
+        onLogout={handleLogout}
+      />
+
       <div className="flex-1 overflow-x-hidden">
         {currentView === 'clients' && (
-          <ClientManager 
-            clients={clients} 
+          <ClientManager
+            clients={clients}
             priceList={priceList}
-            onAddClient={(c) => setClients([...clients, c])}
-            onUpdateClient={(c) => setClients(clients.map(client => client.id === c.id ? c : client))}
-            onDeleteClient={(id) => setClients(clients.filter(c => c.id !== id))}
+            onAddClient={async (c) => {
+              try {
+                const { id, ...newClient } = c;
+                const created = await ClientService.create(newClient);
+                setClients([...clients, created]);
+              } catch (e) { console.error(e); alert('Erro ao criar cliente'); }
+            }}
+            onUpdateClient={async (c) => {
+              try {
+                const updated = await ClientService.update(c.id, c);
+                setClients(clients.map(client => client.id === c.id ? updated : client));
+              } catch (e) { console.error(e); alert('Erro ao atualizar cliente'); }
+            }}
+            onDeleteClient={async (id) => {
+              try {
+                await ClientService.delete(id);
+                setClients(clients.filter(c => c.id !== id));
+              } catch (e) { console.error(e); alert('Erro ao excluir cliente'); }
+            }}
           />
         )}
 
         {currentView === 'prices' && (
-          <PriceManager 
+          <PriceManager
             items={priceList}
-            onAdd={(item) => setPriceList([...priceList, item])}
-            onUpdate={(item) => setPriceList(priceList.map(i => i.id === item.id ? item : i))}
-            onDelete={(id) => setPriceList(priceList.filter(i => i.id !== id))}
+            onAdd={async (item) => {
+              try {
+                const { id, ...newItem } = item;
+                const created = await PriceService.create(newItem);
+                setPriceList([...priceList, created]);
+              } catch (e) { console.error(e); alert('Erro ao criar item de preço'); }
+            }}
+            onUpdate={async (item) => {
+              try {
+                const updated = await PriceService.update(item.id, item);
+                setPriceList(priceList.map(i => i.id === item.id ? updated : i));
+              } catch (e) { console.error(e); alert('Erro ao atualizar item de preço'); }
+            }}
+            onDelete={async (id) => {
+              try {
+                await PriceService.delete(id);
+                setPriceList(priceList.filter(i => i.id !== id));
+              } catch (e) { console.error(e); alert('Erro ao excluir item de preço'); }
+            }}
           />
         )}
 
         {currentView === 'settings' && (
-          <SettingsManager 
+          <SettingsManager
             settings={settings}
-            onSave={setSettings}
+            onSave={async (newSettings) => {
+              try {
+                await SettingsService.save(newSettings);
+                setSettings(newSettings);
+
+                const fresh = await SettingsService.get();
+                if (fresh) setSettings(fresh);
+
+                alert('Configurações salvas!');
+              } catch (e) { console.error(e); alert('Erro ao salvar configurações'); }
+            }}
           />
         )}
 
         {currentView === 'dashboard' && (
-          <Dashboard 
+          <Dashboard
             proposals={proposals}
             onEdit={handleEditProposal}
             onDelete={handleDeleteProposal}
@@ -198,22 +351,22 @@ export default function App() {
             {/* Editor Header */}
             <header className="sticky top-0 z-40 flex items-center bg-white border-b border-primary/10 p-4 justify-between shadow-sm">
               <div className="flex items-center gap-3">
-                <button 
+                <button
                   onClick={() => setCurrentView('dashboard')}
                   className="text-primary flex size-10 items-center justify-center rounded-full hover:bg-primary/10 cursor-pointer transition-colors"
                 >
                   <ArrowLeft size={24} />
                 </button>
                 <div>
-                   <h2 className="text-[#151316] text-lg font-bold leading-tight">
+                  <h2 className="text-[#151316] text-lg font-bold leading-tight">
                     {proposals.find(p => p.id === editorData.id) ? 'Editar Proposta' : 'Nova Proposta'}
                   </h2>
                   <p className="text-xs text-gray-500">{editorData.number}</p>
                 </div>
-               
+
               </div>
               <div className="flex gap-2">
-                <button 
+                <button
                   onClick={() => setShowPreview(true)}
                   className="hidden sm:flex items-center gap-2 px-4 py-2 border border-primary text-primary font-semibold rounded-lg hover:bg-primary/5 transition-colors text-sm"
                 >
@@ -231,7 +384,7 @@ export default function App() {
                     <FileText className="text-primary w-6 h-6" />
                     <h3 className="text-[#151316] text-lg font-bold">Informações Básicas</h3>
                   </div>
-                  <button 
+                  <button
                     onClick={() => setIsClientModalOpen(true)}
                     className="flex items-center gap-2 text-sm text-primary font-bold hover:underline"
                   >
@@ -239,7 +392,7 @@ export default function App() {
                     Importar Cliente
                   </button>
                 </div>
-                
+
                 {/* Client Selection Modal Overlay */}
                 {isClientModalOpen && (
                   <div className="fixed inset-0 z-[70] bg-black/50 flex items-center justify-center p-4">
@@ -262,13 +415,13 @@ export default function App() {
                         )}
                       </div>
                       <div className="mt-4 pt-4 border-t flex justify-end">
-                        <button 
+                        <button
                           onClick={() => setIsClientModalOpen(false)}
                           className="px-4 py-2 text-gray-500 hover:bg-gray-100 rounded-lg"
                         >
                           Fechar
                         </button>
-                         <button 
+                        <button
                           onClick={() => {
                             setIsClientModalOpen(false);
                             setCurrentView('clients');
@@ -397,9 +550,9 @@ export default function App() {
               </section>
 
               {/* Timeline Builder */}
-              <TimelineEditor 
-                items={editorData.timeline} 
-                onChange={(items) => updateEditorField('timeline', items)} 
+              <TimelineEditor
+                items={editorData.timeline}
+                onChange={(items) => updateEditorField('timeline', items)}
               />
 
               {/* Investment Section */}
@@ -503,7 +656,7 @@ export default function App() {
             {/* Fixed Action Bar for Editor */}
             <footer className="fixed bottom-0 left-0 right-0 md:left-20 lg:left-64 bg-white border-t border-primary/10 p-4 shadow-2xl z-50">
               <div className="max-w-4xl mx-auto flex gap-3 md:gap-4">
-                <button 
+                <button
                   onClick={() => setShowPreview(true)}
                   className="flex-1 flex items-center justify-center gap-2 px-4 py-3 border-2 border-primary text-primary font-bold rounded-xl hover:bg-primary/5 transition-all text-base focus:outline-none focus:ring-2 focus:ring-primary/50"
                 >
@@ -511,7 +664,7 @@ export default function App() {
                   <span className="hidden sm:inline">Visualizar PDF</span>
                   <span className="sm:hidden">Preview</span>
                 </button>
-                <button 
+                <button
                   onClick={handleSaveProposal}
                   className="flex-[1.5] flex items-center justify-center gap-2 px-4 py-3 bg-primary text-white font-bold rounded-xl hover:bg-opacity-90 shadow-lg shadow-primary/30 transition-all text-base focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
                 >
@@ -525,10 +678,10 @@ export default function App() {
       </div>
 
       {/* Preview Modal */}
-      <PreviewModal 
-        data={editorData} 
-        isOpen={showPreview} 
-        onClose={() => setShowPreview(false)} 
+      <PreviewModal
+        data={editorData}
+        isOpen={showPreview}
+        onClose={() => setShowPreview(false)}
       />
     </div>
   );

@@ -1,12 +1,13 @@
 import React from 'react';
-import { LayoutDashboard, Users, FilePlus2, FileStack, Tags, Settings } from 'lucide-react';
+import { LayoutDashboard, Users, FilePlus2, FileStack, Tags, Settings, LogOut } from 'lucide-react';
 
 interface SidebarProps {
   currentView: 'dashboard' | 'clients' | 'editor' | 'prices' | 'settings';
   onNavigate: (view: 'dashboard' | 'clients' | 'editor' | 'prices' | 'settings') => void;
+  onLogout: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ currentView, onNavigate }) => {
+const Sidebar: React.FC<SidebarProps> = ({ currentView, onNavigate, onLogout }) => {
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'clients', label: 'Clientes', icon: Users },
@@ -28,16 +29,15 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onNavigate }) => {
         {menuItems.map((item) => {
           const isActive = currentView === item.id;
           const Icon = item.icon;
-          
+
           return (
             <button
               key={item.id}
               onClick={() => onNavigate(item.id as any)}
-              className={`w-full flex items-center justify-center md:justify-start gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
-                isActive 
-                  ? 'bg-primary text-white shadow-lg shadow-primary/20' 
+              className={`w-full flex items-center justify-center md:justify-start gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${isActive
+                  ? 'bg-primary text-white shadow-lg shadow-primary/20'
                   : 'text-gray-500 hover:bg-primary/5 hover:text-primary'
-              }`}
+                }`}
             >
               <Icon size={22} />
               <span className={`font-medium hidden md:block ${isActive ? 'font-bold' : ''}`}>
@@ -48,11 +48,19 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onNavigate }) => {
         })}
       </nav>
 
-      <div className="p-4 border-t border-primary/5">
+      <div className="p-4 border-t border-primary/5 space-y-4">
         <div className="bg-gradient-to-br from-primary/5 to-purple-100/50 p-4 rounded-xl hidden md:block">
           <p className="text-xs font-bold text-primary mb-1">Versão Pro</p>
-          <p className="text-[10px] text-gray-500">Gerencie todas as suas propostas em um só lugar.</p>
+          <p className="text-[10px] text-gray-500 mb-2">Gerencie todas as suas propostas em um só lugar.</p>
         </div>
+
+        <button
+          onClick={onLogout}
+          className="w-full flex items-center justify-center md:justify-start gap-3 px-4 py-2 text-red-500 hover:bg-red-50 rounded-xl transition-colors"
+        >
+          <LogOut size={20} />
+          <span className="font-medium hidden md:block">Sair</span>
+        </button>
       </div>
     </div>
   );
