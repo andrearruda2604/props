@@ -14,7 +14,7 @@ export const ClientService = {
             website: row.website,
             email: row.email,
             discountRules: row.discount_rules,
-            // priceOverrides not yet in DB schema, ignore or handle if added later
+            priceOverrides: row.price_overrides,
         };
     },
 
@@ -29,6 +29,7 @@ export const ClientService = {
         if (client.website !== undefined) dbObj.website = client.website;
         if (client.email !== undefined) dbObj.email = client.email;
         if (client.discountRules !== undefined) dbObj.discount_rules = client.discountRules;
+        if (client.priceOverrides !== undefined) dbObj.price_overrides = client.priceOverrides;
         return dbObj;
     },
 
