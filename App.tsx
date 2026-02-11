@@ -48,9 +48,7 @@ export default function App() {
     return () => subscription.unsubscribe();
   }, []);
 
-  if (!session) {
-    return <Auth />;
-  }
+
 
 
   // Navigation State
@@ -255,6 +253,10 @@ export default function App() {
   const handleLogout = async () => {
     await supabase.auth.signOut();
   };
+
+  if (!session) {
+    return <Auth />;
+  }
 
   return (
     // Inject dynamic CSS variable for primary color
