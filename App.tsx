@@ -86,7 +86,7 @@ export default function App() {
       };
       fetchData();
     }
-  }, [session]);
+  }, [session?.user?.id]);
 
   // Editor State
   const [editorData, setEditorData] = useState<ProposalData>(INITIAL_DATA);
