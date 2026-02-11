@@ -350,6 +350,18 @@ export default function App() {
           <Dashboard
             proposals={proposals}
             onEdit={handleEditProposal}
+            onClone={async (proposal) => {
+              if (confirm('Criar uma nova revisão desta proposta?')) {
+                try {
+                  const newRevision = await ProposalService.createRevision(proposal);
+                  setProposals([newRevision, ...proposals]);
+                  alert(`Nova revisão (R${newRevision.revision}) criada!`);
+                } catch (error) {
+                  console.error("Erro ao criar revisão:", error);
+                  alert("Erro ao criar revisão.");
+                }
+              }
+            }}
             onDelete={handleDeleteProposal}
             onUpdateStatus={handleUpdateStatus}
           />

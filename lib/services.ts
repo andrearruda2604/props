@@ -84,6 +84,7 @@ export const ProposalService = {
             id: row.id,
             status: row.status,
             createdAt: row.created_at,
+            revision: row.revision || 0, // Default to 0 if null
             clientId: row.client_id,
             number: row.number,
             title: row.title,
@@ -105,6 +106,7 @@ export const ProposalService = {
     mapToDb(proposal: Partial<ProposalData>): any {
         const dbObj: any = {};
         if (proposal.status !== undefined) dbObj.status = proposal.status;
+        if (proposal.revision !== undefined) dbObj.revision = proposal.revision;
         // createdAt usually managed by DB, but if frontend sends it and we want to preserve:
         // dbObj.created_at = proposal.createdAt; 
         if (proposal.clientId !== undefined) dbObj.client_id = proposal.clientId;
@@ -137,8 +139,22 @@ export const ProposalService = {
 
     async create(proposal: Omit<ProposalData, 'id'>) {
         const dbData = this.mapToDb(proposal);
-        // Ensure status default if missing
+        // Ensure status and revision default if missing
         if (!dbData.status) dbData.status = 'Rascunho';
+        if (dbData.revision === undefined) dbData.revision = 0;
+
+        // Auto-generate number if not provided
+        if (!dbData.number) {
+            const { data: numData, error: numError } = await supabase.rpc('generate_proposal_number');
+            if (!numError && numData) {
+                dbData.number = numData;
+            } else {
+                // Fallback if function doesn't exist or fails (e.g. during migration)
+                console.error('Error generating number:', numError);
+                const year = new Date().getFullYear();
+                dbData.number = `N. ${year}-${Date.now().toString().slice(-4)}`;
+            }
+        }
 
         const { data, error } = await supabase
             .from('proposals')
@@ -148,6 +164,22 @@ export const ProposalService = {
 
         if (error) throw error;
         return this.mapToProposal(data);
+    },
+
+    async createRevision(originalProposal: ProposalData) {
+        // 1. Prepare new data based on original
+        const { id, ...rest } = originalProposal;
+        const newRevisionNumber = (originalProposal.revision || 0) + 1;
+
+        const newProposalData = {
+            ...rest,
+            revision: newRevisionNumber,
+            status: 'Rascunho' as const,
+            // Keep the same 'number' (e.g. N. 2024001)
+        };
+
+        // 2. Insert as new row
+        return this.create(newProposalData as any);
     },
 
     async update(id: string, proposal: Partial<ProposalData>) {

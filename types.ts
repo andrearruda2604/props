@@ -48,8 +48,9 @@ export interface ProposalData {
   id: string; // Unique ID for the system
   status: ProposalStatus;
   createdAt: string;
+  revision: number;
   clientId?: string; // Link to client
-  
+
   // Proposal Content
   number: string;
   title: string;
@@ -71,6 +72,7 @@ export const INITIAL_DATA: ProposalData = {
   id: '1',
   status: 'Rascunho',
   createdAt: new Date().toISOString(),
+  revision: 0,
   number: "N. 2026001",
   title: "Redesign Plataforma E-commerce",
   description: "Descreva os entregáveis e objetivos do projeto. O escopo inclui o redesign completo da interface, otimização da experiência do usuário (UX) e implementação de novas funcionalidades de checkout.",

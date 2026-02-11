@@ -6,6 +6,7 @@ interface DashboardProps {
   proposals: ProposalData[];
   onEdit: (proposal: ProposalData) => void;
   onDelete: (id: string) => void;
+  onClone: (proposal: ProposalData) => void;
   onUpdateStatus: (id: string, status: ProposalStatus) => void;
 }
 
@@ -25,7 +26,7 @@ const Dashboard: React.FC<DashboardProps> = ({ proposals, onEdit, onDelete, onUp
 
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-8">
-      
+
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-white p-6 rounded-xl border border-primary/10 shadow-sm flex items-center gap-4">
@@ -68,7 +69,7 @@ const Dashboard: React.FC<DashboardProps> = ({ proposals, onEdit, onDelete, onUp
               </thead>
               <tbody className="divide-y divide-gray-50">
                 {proposals.length === 0 ? (
-                   <tr>
+                  <tr>
                     <td colSpan={6} className="px-6 py-12 text-center text-gray-400">
                       Nenhuma proposta criada ainda.
                     </td>
@@ -91,7 +92,7 @@ const Dashboard: React.FC<DashboardProps> = ({ proposals, onEdit, onDelete, onUp
                           </button>
                           <div className="absolute top-full left-0 mt-1 w-32 bg-white shadow-xl rounded-lg overflow-hidden hidden group-hover:block z-20 border border-gray-100">
                             {(['Rascunho', 'Enviado', 'Aprovado', 'Rejeitado'] as ProposalStatus[]).map(s => (
-                              <button 
+                              <button
                                 key={s}
                                 onClick={() => onUpdateStatus(prop.id, s)}
                                 className="block w-full text-left px-4 py-2 hover:bg-primary/5 text-gray-700 text-xs"
@@ -107,14 +108,14 @@ const Dashboard: React.FC<DashboardProps> = ({ proposals, onEdit, onDelete, onUp
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">
-                          <button 
+                          <button
                             onClick={() => onEdit(prop)}
                             className="p-1.5 hover:bg-primary/10 rounded text-primary transition-colors"
                             title="Editar"
                           >
                             <Edit size={16} />
                           </button>
-                          <button 
+                          <button
                             onClick={() => onDelete(prop.id)}
                             className="p-1.5 hover:bg-red-50 rounded text-red-400 hover:text-red-600 transition-colors"
                             title="Excluir"
