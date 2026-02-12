@@ -18,7 +18,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onNavigate, onLogout }) 
   ];
 
   return (
-    <div className="w-20 md:w-64 bg-white border-r border-primary/10 flex-shrink-0 flex flex-col h-screen sticky top-0">
+    <div className="w-20 md:w-64 bg-white border-r border-primary/10 flex-shrink-0 flex flex-col h-screen sticky top-0 print:hidden">
       <div className="p-6 flex items-center justify-center md:justify-start gap-3 border-b border-primary/5">
         <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white font-bold transition-colors">
           <FileStack size={18} />
