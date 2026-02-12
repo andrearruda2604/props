@@ -1,16 +1,5 @@
--- Add numbering settings to company_settings safely
-do $$
-begin
-    if not exists (select 1 from information_schema.columns where table_name = 'company_settings' and column_name = 'next_proposal_seq') then
-        alter table company_settings add column next_proposal_seq integer default 1;
-    end if;
-
-    if not exists (select 1 from information_schema.columns where table_name = 'company_settings' and column_name = 'use_date_prefix') then
-        alter table company_settings add column use_date_prefix boolean default true;
-    end if;
-end $$;
-
--- Update the generation function to use these settings
+-- Force update the proposal number generation function
+-- This overwrites any previous version of the function
 create or replace function generate_proposal_number()
 returns text
 language plpgsql

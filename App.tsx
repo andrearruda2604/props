@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { GoogleGenAI } from "@google/genai";
-import { ProposalData, INITIAL_DATA, Client, ProposalStatus, PriceItem, INITIAL_PRICES, CompanySettings, INITIAL_SETTINGS } from './types';
+import { ProposalData, INITIAL_DATA, Client, ProposalStatus, PriceItem, INITIAL_PRICES, CompanySettings, INITIAL_SETTINGS, ReceiptData, INITIAL_RECEIPT } from './types';
 import TimelineEditor from './components/TimelineEditor';
 import PreviewModal from './components/PreviewModal';
 import Sidebar from './components/Sidebar';
@@ -30,7 +30,10 @@ import {
 import Auth from './components/Auth';
 import { supabase } from './lib/supabase';
 import { Session } from '@supabase/supabase-js';
-import { ClientService, ProposalService, PriceService, SettingsService } from './lib/services';
+import { ClientService, ProposalService, PriceService, SettingsService, ReceiptService } from './lib/services';
+import ReceiptManager from './components/ReceiptManager';
+import ReceiptEditor from './components/ReceiptEditor';
+import ReceiptPreview from './components/ReceiptPreview';
 
 export default function App() {
   const [session, setSession] = useState<Session | null>(null);
@@ -53,13 +56,14 @@ export default function App() {
 
 
   // Navigation State
-  const [currentView, setCurrentView] = useState<'dashboard' | 'clients' | 'editor' | 'prices' | 'settings'>('dashboard');
+  const [currentView, setCurrentView] = useState<'dashboard' | 'clients' | 'editor' | 'prices' | 'settings' | 'receipts' | 'receipt-editor'>('dashboard');
 
   // Data State
   const [clients, setClients] = useState<Client[]>([]);
   const [proposals, setProposals] = useState<ProposalData[]>([]);
   const [priceList, setPriceList] = useState<PriceItem[]>([]);
   const [settings, setSettings] = useState<CompanySettings>(INITIAL_SETTINGS);
+  const [receipts, setReceipts] = useState<ReceiptData[]>([]);
   const [loadingData, setLoadingData] = useState(true);
 
   // Fetch Guard
@@ -72,17 +76,19 @@ export default function App() {
         fetchedForUserId.current = session.user.id;
         setLoadingData(true);
         try {
-          const [clientsData, proposalsData, pricesData, settingsData] = await Promise.all([
+          const [clientsData, proposalsData, pricesData, settingsData, receiptsData] = await Promise.all([
             ClientService.getAll(),
             ProposalService.getAll(),
             PriceService.getAll(),
-            SettingsService.get()
+            SettingsService.get(),
+            ReceiptService.getAll()
           ]);
 
           setClients(clientsData);
           setProposals(proposalsData);
           setPriceList(pricesData);
           if (settingsData) setSettings(settingsData);
+          setReceipts(receiptsData);
         } catch (error) {
           console.error("Error fetching data:", error);
           // Allow retrying on error? For now, let's keep it safe.
@@ -100,6 +106,8 @@ export default function App() {
   const [showPreview, setShowPreview] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isClientModalOpen, setIsClientModalOpen] = useState(false);
+  const [showReceiptPreview, setShowReceiptPreview] = useState(false);
+  const [receiptEditorData, setReceiptEditorData] = useState<ReceiptData>(INITIAL_RECEIPT);
 
   // Helper: Get next proposal number
   const getNextProposalNumber = () => {
@@ -109,7 +117,7 @@ export default function App() {
   };
 
   // Actions
-  const handleNavigate = (view: 'dashboard' | 'clients' | 'editor' | 'prices' | 'settings') => {
+  const handleNavigate = (view: 'dashboard' | 'clients' | 'editor' | 'prices' | 'settings' | 'receipts' | 'receipt-editor') => {
     if (view === 'editor') {
       // Check if we are editing an existing proposal or creating a new one
       // If navigating directly to 'editor' via menu, implies new proposal.
@@ -129,6 +137,15 @@ export default function App() {
         contactRole: settings.defaultContactRole,
         contactPhone: settings.defaultContactPhone,
         contactWebsite: settings.defaultContactWebsite
+      });
+    } else if (view === 'receipt-editor') {
+      setReceiptEditorData({
+        ...INITIAL_RECEIPT,
+        id: '',
+        createdAt: new Date().toISOString(),
+        status: 'Rascunho',
+        items: [],
+        // Pre-fill numbers if we had logic
       });
     }
     setCurrentView(view);
@@ -257,6 +274,43 @@ export default function App() {
     }
   };
 
+  const handleEditReceipt = (receipt: ReceiptData) => {
+    setReceiptEditorData(receipt);
+    setCurrentView('receipt-editor');
+  };
+
+  const handleSaveReceipt = async (receipt: ReceiptData) => {
+    try {
+      let saved: ReceiptData;
+      if (receipt.id) {
+        saved = await ReceiptService.update(receipt.id, receipt);
+        setReceipts(prev => prev.map(r => r.id === saved.id ? saved : r));
+      } else {
+        const { id, ...newReceipt } = receipt;
+        saved = await ReceiptService.create(newReceipt);
+        setReceipts(prev => [saved, ...prev]);
+      }
+      setCurrentView('receipts');
+    } catch (e) {
+      console.error(e);
+      alert('Erro ao salvar recibo');
+    }
+  };
+
+  const handleDeleteReceipt = async (id: string) => {
+    if (confirm('Tem certeza que deseja excluir este recibo?')) {
+      try {
+        await ReceiptService.delete(id);
+        setReceipts(prev => prev.filter(r => r.id !== id));
+      } catch (e) { console.error(e); alert('Erro ao excluir recibo'); }
+    }
+  };
+
+  const handlePrintReceipt = (receipt: ReceiptData) => {
+    setReceiptEditorData(receipt);
+    setShowReceiptPreview(true);
+  };
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
   };
@@ -326,6 +380,25 @@ export default function App() {
                 setPriceList(priceList.filter(i => i.id !== id));
               } catch (e) { console.error(e); alert('Erro ao excluir item de preço'); }
             }}
+          />
+        )}
+
+        {currentView === 'receipts' && (
+          <ReceiptManager
+            receipts={receipts}
+            onAdd={() => handleNavigate('receipt-editor')}
+            onEdit={handleEditReceipt}
+            onDelete={handleDeleteReceipt}
+            onPrint={handlePrintReceipt}
+          />
+        )}
+
+        {currentView === 'receipt-editor' && (
+          <ReceiptEditor
+            data={receiptEditorData}
+            clients={clients}
+            onSave={handleSaveReceipt}
+            onCancel={() => setCurrentView('receipts')}
           />
         )}
 
@@ -683,6 +756,12 @@ export default function App() {
         data={editorData}
         isOpen={showPreview}
         onClose={() => setShowPreview(false)}
+      />
+
+      <ReceiptPreview
+        data={receiptEditorData}
+        isOpen={showReceiptPreview}
+        onClose={() => setShowReceiptPreview(false)}
       />
     </div>
   );

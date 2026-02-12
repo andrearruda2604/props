@@ -1,9 +1,9 @@
 import React from 'react';
-import { LayoutDashboard, Users, FilePlus2, FileStack, Tags, Settings, LogOut } from 'lucide-react';
+import { LayoutDashboard, Users, FilePlus2, FileStack, Tags, Settings, LogOut, Receipt } from 'lucide-react';
 
 interface SidebarProps {
-  currentView: 'dashboard' | 'clients' | 'editor' | 'prices' | 'settings';
-  onNavigate: (view: 'dashboard' | 'clients' | 'editor' | 'prices' | 'settings') => void;
+  currentView: 'dashboard' | 'clients' | 'editor' | 'prices' | 'settings' | 'receipts' | 'receipt-editor';
+  onNavigate: (view: 'dashboard' | 'clients' | 'editor' | 'prices' | 'settings' | 'receipts' | 'receipt-editor') => void;
   onLogout: () => void;
 }
 
@@ -11,6 +11,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onNavigate, onLogout }) 
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'clients', label: 'Clientes', icon: Users },
+    { id: 'receipts', label: 'Recibos', icon: Receipt },
     { id: 'prices', label: 'Tabela de Preços', icon: Tags },
     { id: 'editor', label: 'Nova Proposta', icon: FilePlus2 },
     { id: 'settings', label: 'Configurações', icon: Settings },
@@ -35,8 +36,8 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onNavigate, onLogout }) 
               key={item.id}
               onClick={() => onNavigate(item.id as any)}
               className={`w-full flex items-center justify-center md:justify-start gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${isActive
-                  ? 'bg-primary text-white shadow-lg shadow-primary/20'
-                  : 'text-gray-500 hover:bg-primary/5 hover:text-primary'
+                ? 'bg-primary text-white shadow-lg shadow-primary/20'
+                : 'text-gray-500 hover:bg-primary/5 hover:text-primary'
                 }`}
             >
               <Icon size={22} />

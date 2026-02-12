@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import { Client, ProposalData, PriceItem, CompanySettings } from '../types';
+import { Client, ProposalData, PriceItem, CompanySettings, ReceiptData } from '../types';
 
 export const ClientService = {
     // Mapper: DB -> Frontend
@@ -329,5 +329,95 @@ export const SettingsService = {
             if (error) throw error;
             return data;
         }
+    }
+};
+
+export const ReceiptService = {
+    mapToReceipt(row: any): ReceiptData {
+        return {
+            id: row.id,
+            createdAt: row.created_at,
+            number: row.number,
+            contractorName: row.contractor_name,
+            contractorRole: row.contractor_role,
+            contractorDoc: row.contractor_doc,
+            clientId: row.client_id,
+            contracteeName: row.contractee_name,
+            contracteeDoc: row.contractee_doc,
+            items: row.items || [],
+            totalValue: parseFloat(row.total_value) || 0,
+            deliveryDate: row.delivery_date,
+            warrantyDays: row.warranty_days,
+            warrantyStartDate: row.warranty_start_date,
+            warrantyEndDate: row.warranty_end_date,
+            extraWarrantyRate: parseFloat(row.extra_warranty_rate) || 180,
+            paymentDate: row.payment_date,
+            status: row.status,
+            location: row.location || 'Curitiba/PR'
+        };
+    },
+
+    mapToDb(receipt: Partial<ReceiptData>): any {
+        const dbObj: any = {};
+        if (receipt.number !== undefined) dbObj.number = receipt.number;
+        if (receipt.contractorName !== undefined) dbObj.contractor_name = receipt.contractorName;
+        if (receipt.contractorRole !== undefined) dbObj.contractor_role = receipt.contractorRole;
+        if (receipt.clientId !== undefined) dbObj.client_id = receipt.clientId;
+        if (receipt.contracteeName !== undefined) dbObj.contractee_name = receipt.contracteeName;
+        if (receipt.contracteeDoc !== undefined) dbObj.contractee_doc = receipt.contracteeDoc;
+        if (receipt.items !== undefined) dbObj.items = receipt.items;
+        if (receipt.totalValue !== undefined) dbObj.total_value = receipt.totalValue;
+        if (receipt.deliveryDate !== undefined) dbObj.delivery_date = receipt.deliveryDate;
+        if (receipt.warrantyDays !== undefined) dbObj.warranty_days = receipt.warrantyDays;
+        if (receipt.warrantyStartDate !== undefined) dbObj.warranty_start_date = receipt.warrantyStartDate;
+        if (receipt.warrantyEndDate !== undefined) dbObj.warranty_end_date = receipt.warrantyEndDate;
+        if (receipt.extraWarrantyRate !== undefined) dbObj.extra_warranty_rate = receipt.extraWarrantyRate;
+        if (receipt.paymentDate !== undefined) dbObj.payment_date = receipt.paymentDate;
+        if (receipt.status !== undefined) dbObj.status = receipt.status;
+        return dbObj;
+    },
+
+    async getAll() {
+        const { data, error } = await supabase
+            .from('receipts')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        return (data || []).map(this.mapToReceipt);
+    },
+
+    async create(receipt: Omit<ReceiptData, 'id'>) {
+        const dbData = this.mapToDb(receipt);
+        const { data, error } = await supabase
+            .from('receipts')
+            .insert(dbData)
+            .select()
+            .single();
+
+        if (error) throw error;
+        return this.mapToReceipt(data);
+    },
+
+    async update(id: string, receipt: Partial<ReceiptData>) {
+        const dbData = this.mapToDb(receipt);
+        const { data, error } = await supabase
+            .from('receipts')
+            .update(dbData)
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) throw error;
+        return this.mapToReceipt(data);
+    },
+
+    async delete(id: string) {
+        const { error } = await supabase
+            .from('receipts')
+            .delete()
+            .eq('id', id);
+
+        if (error) throw error;
     }
 };

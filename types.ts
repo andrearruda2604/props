@@ -42,6 +42,58 @@ export interface CompanySettings {
   useDatePrefix: boolean;
 }
 
+export interface ReceiptItem {
+  id: string;
+  description: string;
+  hours: number;
+  rate: number;
+  subtotal: number;
+}
+
+export interface ReceiptData {
+  id: string;
+  createdAt: string;
+  number: string;
+
+  contractorName: string;
+  contractorRole?: string;
+  contractorDoc?: string; // CPF/CNPJ if needed
+
+  clientId?: string;
+  contracteeName: string;
+  contracteeDoc?: string; // CNPJ
+
+  items: ReceiptItem[];
+  totalValue: number;
+
+  deliveryDate?: string;
+  warrantyDays: number;
+  warrantyStartDate?: string;
+  warrantyEndDate?: string;
+
+  extraWarrantyRate: number; // 180 default
+
+  paymentDate?: string;
+
+  location?: string; // Curitiba/PR
+
+  status: 'Rascunho' | 'Emitido';
+}
+
+export const INITIAL_RECEIPT: ReceiptData = {
+  id: '',
+  createdAt: new Date().toISOString(),
+  number: '', // Generated
+  contractorName: 'André Luis Santos de Arruda',
+  contracteeName: '',
+  items: [],
+  totalValue: 0,
+  warrantyDays: 30,
+  extraWarrantyRate: 180,
+  location: 'Curitiba/PR',
+  status: 'Rascunho'
+};
+
 export interface TimelineItem {
   id: string;
   title: string;
