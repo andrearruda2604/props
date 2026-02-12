@@ -1,15 +1,18 @@
 import React from 'react';
-import { ReceiptData } from '../types';
+import { ReceiptData, ProposalData } from '../types';
 import { X, Printer } from 'lucide-react';
 
 interface ReceiptPreviewProps {
     data: ReceiptData;
+    proposals: ProposalData[];
     isOpen: boolean;
     onClose: () => void;
 }
 
-export default function ReceiptPreview({ data, isOpen, onClose }: ReceiptPreviewProps) {
+export default function ReceiptPreview({ data, proposals, isOpen, onClose }: ReceiptPreviewProps) {
     if (!isOpen) return null;
+
+    const linkedProposal = data.proposalId ? proposals.find(p => p.id === data.proposalId) : undefined;
 
     const formatDate = (dateStr?: string) => {
         if (!dateStr) return 'DD/MM/AAAA';
@@ -56,6 +59,9 @@ export default function ReceiptPreview({ data, isOpen, onClose }: ReceiptPreview
                         <div className="mb-8 text-center border-b-2 border-black pb-4">
                             <h1 className="text-xl font-bold uppercase tracking-wide">Recibo de Prestação de Serviços Técnicos</h1>
                             <p className="text-lg font-bold mt-2">Nº {data.number || '[00X/2026]'}</p>
+                            {linkedProposal && (
+                                <p className="text-sm mt-1">Ref. Proposta: {linkedProposal.number} - {linkedProposal.title}</p>
+                            )}
                         </div>
 
                         {/* Parties */}

@@ -1,21 +1,43 @@
 import React, { useState, useEffect } from 'react';
-import { ReceiptData, ReceiptItem, Client } from '../types';
-import { ArrowLeft, Save, Plus, Trash2, Users, Calendar } from 'lucide-react';
+import { ReceiptData, ReceiptItem, Client, ProposalData } from '../types';
+import { ArrowLeft, Save, Plus, Trash2, Users, Calendar, FileText } from 'lucide-react';
 
 interface ReceiptEditorProps {
     data: ReceiptData;
     clients: Client[];
+    proposals: ProposalData[];
     onSave: (data: ReceiptData) => void;
     onCancel: () => void;
 }
 
-export default function ReceiptEditor({ data, clients, onSave, onCancel }: ReceiptEditorProps) {
+export default function ReceiptEditor({ data, clients, proposals, onSave, onCancel }: ReceiptEditorProps) {
     const [formData, setFormData] = useState<ReceiptData>(data);
     const [isClientModalOpen, setIsClientModalOpen] = useState(false);
+    const [isProposalModalOpen, setIsProposalModalOpen] = useState(false);
 
     useEffect(() => {
         setFormData(data);
     }, [data]);
+
+    // Auto-calculate warranty dates
+    useEffect(() => {
+        if (formData.deliveryDate) {
+            const delivery = new Date(formData.deliveryDate);
+            // Start Date = Delivery + 1 day
+            const startDate = new Date(delivery);
+            startDate.setDate(startDate.getDate() + 1);
+
+            // End Date = Start Date + Warranty Days
+            const endDate = new Date(startDate);
+            endDate.setDate(endDate.getDate() + formData.warrantyDays);
+
+            setFormData(prev => ({
+                ...prev,
+                warrantyStartDate: startDate.toISOString().split('T')[0],
+                warrantyEndDate: endDate.toISOString().split('T')[0]
+            }));
+        }
+    }, [formData.deliveryDate, formData.warrantyDays]);
 
     const updateField = (field: keyof ReceiptData, value: any) => {
         setFormData(prev => ({ ...prev, [field]: value }));
@@ -125,6 +147,37 @@ export default function ReceiptEditor({ data, clients, onSave, onCancel }: Recei
                                 <option value="Emitido">Emitido</option>
                             </select>
                         </label>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                        <div className="flex flex-col gap-1 relative">
+                            <span className="text-sm font-medium text-gray-600 flex justify-between">
+                                Proposta Referência
+                                <button onClick={() => setIsProposalModalOpen(true)} className="text-xs text-primary font-bold hover:underline flex items-center gap-1">
+                                    <FileText size={12} /> Selecionar
+                                </button>
+                            </span>
+                            <div className="flex items-center gap-2">
+                                <input
+                                    readOnly
+                                    value={formData.proposalId ?
+                                        (proposals.find(p => p.id === formData.proposalId)?.title || 'Proposta não encontrada')
+                                        : ''}
+                                    placeholder="Nenhuma proposta vinculada"
+                                    className="input-field bg-gray-50 cursor-pointer"
+                                    onClick={() => setIsProposalModalOpen(true)}
+                                />
+                                {formData.proposalId && (
+                                    <button
+                                        onClick={() => updateField('proposalId', undefined)}
+                                        className="text-red-400 hover:text-red-600 p-2"
+                                        title="Remover vínculo"
+                                    >
+                                        <Trash2 size={16} />
+                                    </button>
+                                )}
+                            </div>
+                        </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -278,6 +331,49 @@ export default function ReceiptEditor({ data, clients, onSave, onCancel }: Recei
                         <div className="mt-4 pt-4 border-t flex justify-end">
                             <button
                                 onClick={() => setIsClientModalOpen(false)}
+                                className="px-4 py-2 text-gray-500 hover:bg-gray-100 rounded-lg"
+                            >
+                                Cancelar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {isProposalModalOpen && (
+                <div className="fixed inset-0 z-[70] bg-black/50 flex items-center justify-center p-4">
+                    <div className="bg-white rounded-xl p-6 max-w-md w-full shadow-2xl">
+                        <h3 className="font-bold text-lg mb-4">Selecione uma Proposta</h3>
+                        <div className="space-y-2 max-h-60 overflow-y-auto">
+                            {proposals.map(proposal => (
+                                <button
+                                    key={proposal.id}
+                                    onClick={() => {
+                                        updateField('proposalId', proposal.id);
+                                        // Optional: pre-fill client info if empty
+                                        if (!formData.contracteeName && proposal.clientId) {
+                                            const client = clients.find(c => c.id === proposal.clientId);
+                                            if (client) {
+                                                setFormData(prev => ({
+                                                    ...prev,
+                                                    clientId: client.id,
+                                                    contracteeName: client.name,
+                                                    contracteeDoc: client.cnpj || ''
+                                                }));
+                                            }
+                                        }
+                                        setIsProposalModalOpen(false);
+                                    }}
+                                    className="w-full text-left p-3 hover:bg-primary/5 rounded-lg border border-transparent hover:border-primary/10 transition-all"
+                                >
+                                    <div className="font-bold text-gray-800">{proposal.number} - {proposal.title}</div>
+                                    <div className="text-xs text-gray-500">{new Date(proposal.createdAt).toLocaleDateString()} - {proposal.status}</div>
+                                </button>
+                            ))}
+                        </div>
+                        <div className="mt-4 pt-4 border-t flex justify-end">
+                            <button
+                                onClick={() => setIsProposalModalOpen(false)}
                                 className="px-4 py-2 text-gray-500 hover:bg-gray-100 rounded-lg"
                             >
                                 Cancelar

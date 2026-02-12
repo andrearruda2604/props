@@ -397,6 +397,7 @@ export default function App() {
           <ReceiptEditor
             data={receiptEditorData}
             clients={clients}
+            proposals={proposals}
             onSave={handleSaveReceipt}
             onCancel={() => setCurrentView('receipts')}
           />
@@ -760,6 +761,7 @@ export default function App() {
 
       <ReceiptPreview
         data={receiptEditorData}
+        proposals={proposals}
         isOpen={showReceiptPreview}
         onClose={() => setShowReceiptPreview(false)}
       />

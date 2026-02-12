@@ -342,6 +342,7 @@ export const ReceiptService = {
             contractorRole: row.contractor_role,
             contractorDoc: row.contractor_doc,
             clientId: row.client_id,
+            proposalId: row.proposal_id,
             contracteeName: row.contractee_name,
             contracteeDoc: row.contractee_doc,
             items: row.items || [],
@@ -363,6 +364,7 @@ export const ReceiptService = {
         if (receipt.contractorName !== undefined) dbObj.contractor_name = receipt.contractorName;
         if (receipt.contractorRole !== undefined) dbObj.contractor_role = receipt.contractorRole;
         if (receipt.clientId !== undefined) dbObj.client_id = receipt.clientId;
+        if (receipt.proposalId !== undefined) dbObj.proposal_id = receipt.proposalId;
         if (receipt.contracteeName !== undefined) dbObj.contractee_name = receipt.contracteeName;
         if (receipt.contracteeDoc !== undefined) dbObj.contractee_doc = receipt.contracteeDoc;
         if (receipt.items !== undefined) dbObj.items = receipt.items;

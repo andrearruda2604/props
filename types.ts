@@ -60,6 +60,7 @@ export interface ReceiptData {
   contractorDoc?: string; // CPF/CNPJ if needed
 
   clientId?: string;
+  proposalId?: string;
   contracteeName: string;
   contracteeDoc?: string; // CNPJ
 
