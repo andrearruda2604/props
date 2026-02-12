@@ -287,7 +287,9 @@ export const SettingsService = {
             defaultContactName: data.default_contact_name,
             defaultContactRole: data.default_contact_role,
             defaultContactPhone: data.default_contact_phone,
-            defaultContactWebsite: data.default_contact_website
+            defaultContactWebsite: data.default_contact_website,
+            nextProposalSeq: data.next_proposal_seq,
+            useDatePrefix: data.use_date_prefix
         } as CompanySettings;
     },
 
@@ -304,7 +306,9 @@ export const SettingsService = {
             default_contact_name: settings.defaultContactName,
             default_contact_role: settings.defaultContactRole,
             default_contact_phone: settings.defaultContactPhone,
-            default_contact_website: settings.defaultContactWebsite
+            default_contact_website: settings.defaultContactWebsite,
+            next_proposal_seq: settings.nextProposalSeq,
+            use_date_prefix: settings.useDatePrefix
         };
 
         if (current) {

@@ -36,6 +36,10 @@ export interface CompanySettings {
   defaultContactRole: string;
   defaultContactPhone: string;
   defaultContactWebsite: string;
+
+  // Custom Numbering
+  nextProposalSeq: number;
+  useDatePrefix: boolean;
 }
 
 export interface TimelineItem {
@@ -110,5 +114,7 @@ export const INITIAL_SETTINGS: CompanySettings = {
   defaultContactName: "Seu Nome",
   defaultContactRole: "Gerente",
   defaultContactPhone: "(00) 0000-0000",
-  defaultContactWebsite: "www.seusite.com.br"
+  defaultContactWebsite: "www.seusite.com.br",
+  nextProposalSeq: 1,
+  useDatePrefix: true
 };

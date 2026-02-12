@@ -11,7 +11,7 @@ interface SettingsManagerProps {
 const SettingsManager: React.FC<SettingsManagerProps> = ({ settings, onSave }) => {
   const [localSettings, setLocalSettings] = React.useState<CompanySettings>(settings);
 
-  const handleChange = (field: keyof CompanySettings, value: string) => {
+  const handleChange = (field: keyof CompanySettings, value: any) => {
     setLocalSettings(prev => ({ ...prev, [field]: value }));
   };
 
@@ -44,6 +44,47 @@ const SettingsManager: React.FC<SettingsManagerProps> = ({ settings, onSave }) =
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="md:col-span-2 bg-blue-50 p-4 rounded-lg border border-blue-100 mb-2">
+            <h4 className="font-bold text-blue-800 mb-2 flex items-center gap-2">
+              <span className="bg-blue-200 text-blue-700 text-xs px-2 py-0.5 rounded-full">Novo</span>
+              Configuração de Numeração
+            </h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Próximo Número (Sequência)</label>
+                <input
+                  type="number"
+                  min="1"
+                  className="w-full p-2.5 rounded-lg border focus:ring-2 ring-primary/20 outline-none"
+                  value={localSettings.nextProposalSeq}
+                  onChange={(e) => handleChange('nextProposalSeq', parseInt(e.target.value) || 1)}
+                />
+                <p className="text-xs text-gray-500 mt-1">O próximo ID sequencial a ser usado.</p>
+              </div>
+              <div>
+                <label className="flex items-center gap-3 p-3 bg-white rounded-lg border cursor-pointer hover:bg-gray-50 transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={localSettings.useDatePrefix}
+                    onChange={(e) => {
+                      // Must handle boolean change manually because generic handleChange expects string for inputs usually
+                      setLocalSettings(prev => ({ ...prev, useDatePrefix: e.target.checked }));
+                    }}
+                    className="w-5 h-5 text-primary rounded focus:ring-primary"
+                  />
+                  <span className="text-sm font-medium text-gray-700">Usar prefixo de Ano/Mês (YYYYMM)</span>
+                </label>
+              </div>
+              <div className="md:col-span-2 mt-2">
+                <div className="text-sm text-gray-600">
+                  <span className="font-bold">Preview:</span> Como ficará a próxima proposta:
+                  <span className="ml-2 inline-block px-3 py-1 bg-gray-200 text-gray-800 font-mono rounded-md font-bold">
+                    {localSettings.useDatePrefix ? new Date().toISOString().slice(0, 4) + new Date().toISOString().slice(5, 7) : ''}{String(localSettings.nextProposalSeq).padStart(4, '0')}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-2">Cor Principal (Tema)</label>
             <div className="flex items-center gap-4">
