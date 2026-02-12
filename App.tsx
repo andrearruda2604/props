@@ -762,6 +762,7 @@ export default function App() {
       <ReceiptPreview
         data={receiptEditorData}
         proposals={proposals}
+        settings={settings}
         isOpen={showReceiptPreview}
         onClose={() => setShowReceiptPreview(false)}
       />

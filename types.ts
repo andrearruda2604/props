@@ -173,5 +173,7 @@ export const INITIAL_SETTINGS: CompanySettings = {
   defaultContactPhone: "(00) 0000-0000",
   defaultContactWebsite: "www.seusite.com.br",
   nextProposalSeq: 1,
-  useDatePrefix: true
+  useDatePrefix: true,
+  receiptTermText: "Escopo da Garantia: A garantia cobre exclusivamente a correção de bugs ou falhas de funcionamento dos códigos entregues nesta data.\\n\\nSolicitações Extra-Garantia: Alterações de lógica, novas funcionalidades ou suporte após o término do prazo acima serão faturados conforme contrato.\\n\\nQuitação: Este documento serve como recibo de quitação para os valores acima descritos após a confirmação do pagamento.",
+  receiptFooterText: ""
 };
