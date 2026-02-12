@@ -54,6 +54,8 @@ I have implemented the new Receipt Management Module ("Gestão de Recibos"). Thi
     - Fill in other details and save.
 5.  **Print/Preview**:
     - Click the printer icon on the receipt in the list.
+    - **Verify**: Dates are displayed correctly (DD/MM/YYYY).
+    - **Verify**: The "Infraestrutura" paragraph is removed from the "Termos" section.
     - Verify the text matches your requirements exactly, including the proposal reference.
     - Try "Imprimir" (or Ctrl+P) to see the print layout.
 

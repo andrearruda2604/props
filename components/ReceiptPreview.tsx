@@ -16,9 +16,13 @@ export default function ReceiptPreview({ data, proposals, isOpen, onClose }: Rec
 
     const formatDate = (dateStr?: string) => {
         if (!dateStr) return 'DD/MM/AAAA';
-        // Fix timezone offset for display if date is YYYY-MM-DD
-        const [year, month, day] = dateStr.split('-');
-        return `${day}/${month}/${year}`;
+        // Handle YYYY-MM-DD to avoid timezone issues by treating as UTC
+        if (dateStr.includes('-')) {
+            const [year, month, day] = dateStr.split('-');
+            return `${day}/${month}/${year}`;
+        }
+        // Fallback for other formats
+        return new Date(dateStr).toLocaleDateString('pt-BR');
     };
 
     const getFullDate = () => {
@@ -127,9 +131,7 @@ export default function ReceiptPreview({ data, proposals, isOpen, onClose }: Rec
                                 <p>
                                     <span className="font-bold">Solicitações Extra-Garantia:</span> Alterações de lógica, novas funcionalidades ou suporte após o término do prazo acima serão faturados pelo valor de <span className="font-bold">R$ {data.extraWarrantyRate.toFixed(2)}/h</span>, conforme estabelecido na Cláusula 7.1 do contrato principal.
                                 </p>
-                                <p>
-                                    <span className="font-bold">Infraestrutura:</span> Reitera-se que o funcionamento pleno depende da manutenção de planos adequados de infraestrutura e serviços de terceiros (IA/Hospedagem) pela Contratante.
-                                </p>
+
                                 <p>
                                     <span className="font-bold">Quitação:</span> Este documento serve como recibo de quitação para os valores acima descritos após a confirmação do pagamento.
                                 </p>
