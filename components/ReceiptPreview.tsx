@@ -58,7 +58,7 @@ export default function ReceiptPreview({ data, proposals, settings, isOpen, onCl
 
                 {/* Scrollable Content */}
                 <div className="flex-1 overflow-y-auto p-8 bg-gray-50 print:p-0 print:bg-white print:overflow-visible">
-                    <div className="bg-white max-w-[210mm] mx-auto min-h-[297mm] shadow-lg p-12 text-black font-sans leading-relaxed print:shadow-none print:m-0 print:p-8 print:w-full">
+                    <div id="printable-receipt" className="bg-white max-w-[210mm] mx-auto min-h-[297mm] shadow-lg p-12 text-black font-sans leading-relaxed print:shadow-none print:m-0 print:p-8 print:w-full">
 
                         {/* 1. Header Spec */}
                         <div className="mb-8 text-center border-b-2 border-black pb-4">

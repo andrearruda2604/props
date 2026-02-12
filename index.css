@@ -3,7 +3,8 @@
 @tailwind utilities;
 
 :root {
-  --color-primary: #5e3582; /* Default color */
+  --color-primary: #5e3582;
+  /* Default color */
 }
 
 body {
@@ -15,13 +16,63 @@ body {
   width: 8px;
   height: 8px;
 }
+
 ::-webkit-scrollbar-track {
   background: transparent;
 }
+
 ::-webkit-scrollbar-thumb {
   background: #cbd5e1;
   border-radius: 4px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
+}
+
+@media print {
+
+  /* Reset page rules */
+  @page {
+    margin: 0;
+    size: auto;
+  }
+
+  /* Hide everything by default */
+  body * {
+    visibility: hidden;
+  }
+
+  /* Reset global layout to prevent clipping */
+  html,
+  body,
+  #root {
+    height: auto !important;
+    overflow: visible !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Display ONLY the receipt content */
+  #printable-receipt,
+  #printable-receipt * {
+    visibility: visible;
+  }
+
+  /* Positioning the receipt at the very top-left of the paper */
+  #printable-receipt {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0 !important;
+    padding: 2rem !important;
+    /* Some padding for the paper edge */
+    background: white;
+  }
+
+  /* Hide scrollbars in print */
+  ::-webkit-scrollbar {
+    display: none;
+  }
 }
