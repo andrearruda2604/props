@@ -229,12 +229,44 @@ export default function ReceiptEditor({ data, clients, proposals, onSave, onCanc
                                     />
                                 </div>
                                 <div className="col-span-4 md:col-span-2">
-                                    <label className="text-xs font-bold text-gray-400 block mb-1">Horas</label>
-                                    <input type="number"
-                                        value={item.hours}
-                                        onChange={e => updateItem(item.id, 'hours', parseFloat(e.target.value) || 0)}
+                                    <label className="text-xs font-bold text-gray-400 block mb-1">Tempo/Esforço</label>
+                                    <input type="text"
+                                        defaultValue={item.hours > 0 ? `${item.hours}` : ''}
+                                        onBlur={e => {
+                                            let val = e.target.value.toLowerCase().trim();
+                                            let hours = 0;
+
+                                            // Handle various formats
+                                            if (val.includes('min')) {
+                                                // "90 min", "2025 minutos"
+                                                const mins = parseFloat(val.replace(/[^0-9.]/g, '')) || 0;
+                                                hours = mins / 60;
+                                            } else if (val.includes(':')) {
+                                                // "1:30"
+                                                const [h, m] = val.split(':').map(Number);
+                                                hours = (h || 0) + ((m || 0) / 60);
+                                            } else if (val.includes('h') && val.includes('m')) {
+                                                // "1h 30m"
+                                                const h = parseFloat(val.split('h')[0]) || 0;
+                                                const m = parseFloat(val.split('h')[1].replace(/[^0-9.]/g, '')) || 0;
+                                                hours = h + (m / 60);
+                                            } else {
+                                                // Default to hours or try to parse simple number
+                                                hours = parseFloat(val) || 0;
+                                            }
+
+                                            // Update item with calculated hours
+                                            updateItem(item.id, 'hours', hours);
+                                            e.target.value = hours > 0 ? hours.toFixed(2) : '';
+                                        }}
                                         className="w-full text-sm bg-white border border-gray-200 rounded px-2 py-1.5"
+                                        placeholder="Ex: 1.5, 90 min, 1h30m"
                                     />
+                                    {item.hours > 0 && (
+                                        <div className="text-[10px] text-gray-400 mt-0.5">
+                                            = {Math.floor(item.hours)}h {Math.round((item.hours % 1) * 60)}m
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="col-span-4 md:col-span-2">
                                     <label className="text-xs font-bold text-gray-400 block mb-1">Valor Hora</label>
