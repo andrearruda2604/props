@@ -289,7 +289,9 @@ export const SettingsService = {
             defaultContactPhone: data.default_contact_phone,
             defaultContactWebsite: data.default_contact_website,
             nextProposalSeq: data.next_proposal_seq,
-            useDatePrefix: data.use_date_prefix
+            useDatePrefix: data.use_date_prefix,
+            receiptTermText: data.receipt_term_text,
+            receiptFooterText: data.receipt_footer_text
         } as CompanySettings;
     },
 
@@ -308,8 +310,11 @@ export const SettingsService = {
             default_contact_phone: settings.defaultContactPhone,
             default_contact_website: settings.defaultContactWebsite,
             next_proposal_seq: settings.nextProposalSeq,
-            use_date_prefix: settings.useDatePrefix
+            use_date_prefix: settings.useDatePrefix,
+            receipt_term_text: settings.receiptTermText,
+            receipt_footer_text: settings.receiptFooterText
         };
+
 
         if (current) {
             const { data, error } = await supabase

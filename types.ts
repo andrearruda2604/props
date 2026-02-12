@@ -40,6 +40,10 @@ export interface CompanySettings {
   // Custom Numbering
   nextProposalSeq: number;
   useDatePrefix: boolean;
+
+  // Receipt Settings
+  receiptTermText?: string;
+  receiptFooterText?: string;
 }
 
 export interface ReceiptItem {

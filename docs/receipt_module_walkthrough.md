@@ -43,7 +43,8 @@ I have implemented the new Receipt Management Module ("Gestão de Recibos"). Thi
 1.  **Run Database Migrations**: 
     - Execute `supabase/migrations/20260212140000_add_receipts_table.sql`
     - Execute `supabase/migrations/20260212143000_add_proposal_id_to_receipts.sql`
-    - **New**: Execute `supabase/migrations/20260212150000_add_extra_warranty_rate.sql`
+    - Execute `supabase/migrations/20260212150000_add_extra_warranty_rate.sql`
+    - **New**: Execute `supabase/migrations/20260212153000_add_missing_date_columns.sql`
 2.  **Start App**: Run `npm run dev`.
 3.  **Navigate**: Click "Recibos" in the sidebar.
 4.  **Create Receipt**:

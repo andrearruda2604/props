@@ -1,15 +1,16 @@
 import React from 'react';
-import { ReceiptData, ProposalData } from '../types';
+import { ReceiptData, ProposalData, CompanySettings } from '../types';
 import { X, Printer } from 'lucide-react';
 
 interface ReceiptPreviewProps {
     data: ReceiptData;
     proposals: ProposalData[];
+    settings: CompanySettings;
     isOpen: boolean;
     onClose: () => void;
 }
 
-export default function ReceiptPreview({ data, proposals, isOpen, onClose }: ReceiptPreviewProps) {
+export default function ReceiptPreview({ data, proposals, settings, isOpen, onClose }: ReceiptPreviewProps) {
     if (!isOpen) return null;
 
     const linkedProposal = data.proposalId ? proposals.find(p => p.id === data.proposalId) : undefined;
@@ -124,19 +125,21 @@ export default function ReceiptPreview({ data, proposals, isOpen, onClose }: Rec
                         {/* 3. Termos */}
                         <div className="mb-8">
                             <h2 className="text-base font-bold mb-2">3. Termos e Condições de Manutenção</h2>
-                            <div className="space-y-3 text-justify text-sm">
-                                <p>
-                                    <span className="font-bold">Escopo da Garantia:</span> A garantia cobre exclusivamente a correção de bugs ou falhas de funcionamento dos códigos entregues nesta data.
-                                </p>
-                                <p>
-                                    <span className="font-bold">Solicitações Extra-Garantia:</span> Alterações de lógica, novas funcionalidades ou suporte após o término do prazo acima serão faturados pelo valor de <span className="font-bold">R$ {data.extraWarrantyRate.toFixed(2)}/h</span>, conforme estabelecido na Cláusula 7.1 do contrato principal.
-                                </p>
+                            <div className="space-y-3 text-justify text-sm whitespace-pre-wrap">
+                                {settings.receiptTermText || `Escopo da Garantia: A garantia cobre exclusivamente a correção de bugs ou falhas de funcionamento dos códigos entregues nesta data.
 
-                                <p>
-                                    <span className="font-bold">Quitação:</span> Este documento serve como recibo de quitação para os valores acima descritos após a confirmação do pagamento.
-                                </p>
+Solicitações Extra-Garantia: Alterações de lógica, novas funcionalidades ou suporte após o término do prazo acima serão faturados pelo valor de R$ ${data.extraWarrantyRate.toFixed(2)}/h, conforme contrato.
+
+Quitação: Este documento serve como recibo de quitação para os valores acima descritos após a confirmação do pagamento.`}
                             </div>
                         </div>
+
+                        {/* Footer / Notes */}
+                        {settings.receiptFooterText && (
+                            <div className="mb-8 text-sm text-center italic text-gray-600">
+                                {settings.receiptFooterText}
+                            </div>
+                        )}
 
                         {/* Signatures */}
                         <div className="mt-16 pt-8">
