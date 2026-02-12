@@ -31,16 +31,9 @@ body {
 }
 
 @media print {
-
-  /* Reset page rules */
   @page {
     margin: 0;
     size: auto;
-  }
-
-  /* Hide everything by default */
-  body * {
-    visibility: hidden;
   }
 
   /* Reset global layout to prevent clipping */
@@ -51,24 +44,7 @@ body {
     overflow: visible !important;
     margin: 0 !important;
     padding: 0 !important;
-  }
-
-  /* Display ONLY the receipt content */
-  #printable-receipt,
-  #printable-receipt * {
-    visibility: visible;
-  }
-
-  /* Positioning the receipt at the very top-left of the paper */
-  #printable-receipt {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    margin: 0 !important;
-    padding: 2rem !important;
-    /* Some padding for the paper edge */
-    background: white;
+    background: white !important;
   }
 
   /* Hide scrollbars in print */

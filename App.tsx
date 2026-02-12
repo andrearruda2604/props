@@ -329,9 +329,10 @@ export default function App() {
         currentView={currentView}
         onNavigate={handleNavigate}
         onLogout={handleLogout}
+        className="print:hidden"
       />
 
-      <div className="flex-1 overflow-x-hidden">
+      <div className="flex-1 overflow-x-hidden print:hidden">
         {currentView === 'clients' && (
           <ClientManager
             clients={clients}
