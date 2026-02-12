@@ -33,8 +33,8 @@ export default function ReceiptPreview({ data, proposals, settings, isOpen, onCl
     };
 
     return (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200 print:p-0 print:bg-white print:static print:z-auto">
-            <div className="bg-white w-full max-w-4xl h-[90vh] rounded-xl flex flex-col shadow-2xl animate-in zoom-in-95 duration-200 print:shadow-none print:w-full print:h-auto print:rounded-none print:max-w-none">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200 print:p-0 print:bg-white print:static print:z-auto print:block print:animate-none print:inset-auto print:w-full print:h-full">
+            <div className="bg-white w-full max-w-4xl h-[90vh] rounded-xl flex flex-col shadow-2xl animate-in zoom-in-95 duration-200 print:shadow-none print:w-full print:h-auto print:rounded-none print:max-w-none print:block print:animate-none print:border-none">
 
                 {/* Header Actions (No Print) */}
                 <div className="flex items-center justify-between p-4 border-b border-gray-100 print:hidden">
@@ -57,8 +57,8 @@ export default function ReceiptPreview({ data, proposals, settings, isOpen, onCl
                 </div>
 
                 {/* Scrollable Content */}
-                <div className="flex-1 overflow-y-auto p-8 bg-gray-50 print:p-0 print:bg-white print:overflow-visible">
-                    <div id="printable-receipt" className="bg-white max-w-[210mm] mx-auto min-h-[297mm] shadow-lg p-12 text-black font-sans leading-relaxed print:shadow-none print:m-0 print:p-8 print:w-full">
+                <div className="flex-1 overflow-y-auto p-8 bg-gray-50 print:p-0 print:bg-white print:overflow-visible print:block print:h-auto">
+                    <div id="printable-receipt" className="bg-white max-w-[210mm] mx-auto min-h-[297mm] shadow-lg p-12 text-black font-sans leading-relaxed print:shadow-none print:m-0 print:p-8 print:w-full print:static">
 
                         {/* 1. Header Spec */}
                         <div className="mb-8 text-center border-b-2 border-black pb-4">
