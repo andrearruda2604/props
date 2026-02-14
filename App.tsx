@@ -109,25 +109,26 @@ export default function App() {
   const [showReceiptPreview, setShowReceiptPreview] = useState(false);
   const [receiptEditorData, setReceiptEditorData] = useState<ReceiptData>(INITIAL_RECEIPT);
 
-  // Helper: Get next proposal number
-  const getNextProposalNumber = () => {
-    const year = new Date().getFullYear();
-    const count = proposals.length + 1;
-    return `N. ${year}${String(count).padStart(3, '0')}`;
+  // Helper: Preview next proposal number from settings (read-only, does not increment)
+  const getNextProposalNumberPreview = (): string => {
+    const seq = String(settings.nextProposalSeq || 1).padStart(4, '0');
+    const prefix = settings.useDatePrefix
+      ? new Date().toISOString().slice(0, 7).replace('-', '')
+      : '';
+    return `${prefix}${seq}`;
   };
 
   // Actions
   const handleNavigate = (view: 'dashboard' | 'clients' | 'editor' | 'prices' | 'settings' | 'receipts' | 'receipt-editor') => {
     if (view === 'editor') {
-      // Check if we are editing an existing proposal or creating a new one
-      // If navigating directly to 'editor' via menu, implies new proposal.
       // Reset editor for new proposal with company defaults
       setEditorData({
         ...INITIAL_DATA,
         id: '', // Empty ID indicates new proposal
         createdAt: new Date().toISOString(),
         status: 'Rascunho',
-        number: getNextProposalNumber(),
+        title: '', // Start with empty title
+        number: getNextProposalNumberPreview(),
         // Apply company defaults
         logoUrl: settings.logoUrl,
         description: settings.defaultScopeText,
@@ -184,9 +185,9 @@ export default function App() {
         await ProposalService.update(editorData.id, proposalToSave);
         savedProposal = editorData; // Optimistic update or use return from service
       } else {
-        // It's a new proposal. The ID 'random...' is invalid.
-        // We need to remove ID and let Supabase generate it.
+        // It's a new proposal. Remove ID and clear number so RPC generates the real one.
         const { id, ...newProposal } = proposalToSave;
+        newProposal.number = ''; // Let ProposalService.create call generate_proposal_number RPC
         const created = await ProposalService.create(newProposal);
         savedProposal = created;
       }
@@ -200,6 +201,12 @@ export default function App() {
 
       // Return to dashboard after save
       setCurrentView('dashboard');
+
+      // Refresh settings if a new proposal was created (RPC incremented next_proposal_seq)
+      if (!exists) {
+        const freshSettings = await SettingsService.get();
+        if (freshSettings) setSettings(freshSettings);
+      }
     } catch (error) {
       console.error("Error saving proposal:", error);
       alert("Erro ao salvar proposta.");
