@@ -90,14 +90,14 @@ export default function ReceiptManager({ receipts, onAdd, onEdit, onDelete, onPr
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${receipt.status === 'Emitido'
-                                                    ? 'bg-green-100 text-green-800'
-                                                    : 'bg-yellow-100 text-yellow-800'
+                                                ? 'bg-green-100 text-green-800'
+                                                : 'bg-yellow-100 text-yellow-800'
                                                 }`}>
                                                 {receipt.status}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-right">
-                                            <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <div className="flex items-center justify-end gap-2">
                                                 <button
                                                     onClick={() => onPrint(receipt)}
                                                     title="Imprimir/Visualizar"
