@@ -44,6 +44,11 @@ export interface CompanySettings {
   // Receipt Settings
   receiptTermText?: string;
   receiptFooterText?: string;
+
+  // AI Settings
+  aiApiKey?: string;
+  aiModel?: string;
+  aiPrompt?: string;
 }
 
 export interface ReceiptItem {
@@ -175,5 +180,8 @@ export const INITIAL_SETTINGS: CompanySettings = {
   nextProposalSeq: 1,
   useDatePrefix: true,
   receiptTermText: "Escopo da Garantia: A garantia cobre exclusivamente a correção de bugs ou falhas de funcionamento dos códigos entregues nesta data.\\n\\nSolicitações Extra-Garantia: Alterações de lógica, novas funcionalidades ou suporte após o término do prazo acima serão faturados conforme contrato.\\n\\nQuitação: Este documento serve como recibo de quitação para os valores acima descritos após a confirmação do pagamento.",
-  receiptFooterText: ""
+  receiptFooterText: "",
+  aiApiKey: "",
+  aiModel: "gemini-2.0-flash",
+  aiPrompt: "Escreva uma descrição de escopo de projeto comercial profissional, detalhada e persuasiva para um projeto com o título: \"{title}\". Foque nos entregáveis e valor agregado. Limite a 3 parágrafos."
 };

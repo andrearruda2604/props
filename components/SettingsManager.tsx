@@ -1,6 +1,6 @@
 import React from 'react';
 import { CompanySettings } from '../types';
-import { Save, Palette, FileText, Building2, UserCircle } from 'lucide-react';
+import { Save, Palette, FileText, Building2, UserCircle, Bot, Eye, EyeOff } from 'lucide-react';
 import ImageUpload from './ImageUpload';
 
 interface SettingsManagerProps {
@@ -11,7 +11,8 @@ interface SettingsManagerProps {
 const SettingsManager: React.FC<SettingsManagerProps> = ({ settings, onSave }) => {
   const [localSettings, setLocalSettings] = React.useState<CompanySettings>(settings);
 
-  const [activeTab, setActiveTab] = React.useState<'proposals' | 'receipts'>('proposals');
+  const [activeTab, setActiveTab] = React.useState<'proposals' | 'receipts' | 'ai'>('proposals');
+  const [showApiKey, setShowApiKey] = React.useState(false);
 
   const handleChange = (field: keyof CompanySettings, value: any) => {
     setLocalSettings(prev => ({ ...prev, [field]: value }));
@@ -51,6 +52,12 @@ const SettingsManager: React.FC<SettingsManagerProps> = ({ settings, onSave }) =
           className={`pb-3 px-2 font-bold transition-colors border-b-2 ${activeTab === 'receipts' ? 'border-primary text-primary' : 'border-transparent text-gray-400 hover:text-gray-600'}`}
         >
           Recibos
+        </button>
+        <button
+          onClick={() => setActiveTab('ai')}
+          className={`pb-3 px-2 font-bold transition-colors border-b-2 ${activeTab === 'ai' ? 'border-primary text-primary' : 'border-transparent text-gray-400 hover:text-gray-600'}`}
+        >
+          IA
         </button>
       </div>
 
@@ -250,6 +257,71 @@ const SettingsManager: React.FC<SettingsManagerProps> = ({ settings, onSave }) =
                 onChange={(e) => handleChange('receiptFooterText', e.target.value)}
                 placeholder="Texto extra para o rodapé do recibo (opcional)..."
               />
+            </div>
+          </div>
+        </section>
+      </div>
+
+      {/* AI TAB */}
+      <div className={activeTab === 'ai' ? 'space-y-6 block' : 'hidden'}>
+        <section className="bg-white p-6 rounded-xl border border-primary/10 shadow-sm space-y-6">
+          <div className="flex items-center gap-2 border-b border-gray-100 pb-4">
+            <Bot className="text-primary" size={24} />
+            <h3 className="font-bold text-lg text-gray-800">Configurações de IA</h3>
+          </div>
+
+          <div className="space-y-6">
+            {/* API Key */}
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-2">Chave da API (API Key)</label>
+              <div className="relative">
+                <input
+                  type={showApiKey ? 'text' : 'password'}
+                  className="w-full p-3 pr-12 rounded-lg border focus:ring-2 ring-primary/20 outline-none font-mono"
+                  value={localSettings.aiApiKey || ''}
+                  onChange={(e) => handleChange('aiApiKey', e.target.value)}
+                  placeholder="Cole sua API Key aqui..."
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowApiKey(!showApiKey)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                  title={showApiKey ? 'Ocultar' : 'Mostrar'}
+                >
+                  {showApiKey ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+              <p className="text-xs text-gray-500 mt-1">Sua chave da API do Google Gemini. Ela será salva de forma segura.</p>
+            </div>
+
+            {/* Model */}
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-2">Modelo</label>
+              <select
+                className="w-full p-3 rounded-lg border focus:ring-2 ring-primary/20 outline-none bg-white"
+                value={localSettings.aiModel || 'gemini-2.0-flash'}
+                onChange={(e) => handleChange('aiModel', e.target.value)}
+              >
+                <option value="gemini-2.0-flash">Gemini 2.0 Flash (Rápido)</option>
+                <option value="gemini-2.0-flash-lite">Gemini 2.0 Flash Lite (Mais leve)</option>
+                <option value="gemini-2.5-flash-preview-05-20">Gemini 2.5 Flash (Preview)</option>
+                <option value="gemini-2.5-pro-preview-05-06">Gemini 2.5 Pro (Preview)</option>
+              </select>
+              <p className="text-xs text-gray-500 mt-1">O modelo que será usado para gerar o escopo com IA.</p>
+            </div>
+
+            {/* Prompt */}
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-2">Prompt de Geração</label>
+              <textarea
+                className="w-full p-3 rounded-lg border focus:ring-2 ring-primary/20 outline-none min-h-[150px] font-mono text-sm"
+                value={localSettings.aiPrompt || 'Escreva uma descrição de escopo de projeto comercial profissional, detalhada e persuasiva para um projeto com o título: "{title}". Foque nos entregáveis e valor agregado. Limite a 3 parágrafos.'}
+                onChange={(e) => handleChange('aiPrompt', e.target.value)}
+                placeholder="Prompt que será enviado para a IA..."
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Use <code className="bg-gray-100 px-1 py-0.5 rounded text-xs">{'{title}'}</code> para inserir o título do projeto automaticamente no prompt.
+              </p>
             </div>
           </div>
         </section>

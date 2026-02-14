@@ -253,8 +253,9 @@ export default function App() {
   };
 
   const generateScopeWithAI = async () => {
-    if (!process.env.API_KEY) {
-      alert("API Key não configurada.");
+    const apiKey = settings.aiApiKey || process.env.API_KEY;
+    if (!apiKey) {
+      alert("API Key não configurada. Vá em Configurações > IA para adicionar sua chave.");
       return;
     }
     if (!editorData.title) {
@@ -264,10 +265,14 @@ export default function App() {
 
     setIsGenerating(true);
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      const ai = new GoogleGenAI({ apiKey });
+      const model = settings.aiModel || 'gemini-2.0-flash';
+      const promptTemplate = settings.aiPrompt || 'Escreva uma descrição de escopo de projeto comercial profissional, detalhada e persuasiva para um projeto com o título: "{title}". Foque nos entregáveis e valor agregado. Limite a 3 parágrafos.';
+      const prompt = promptTemplate.replace(/\{title\}/g, editorData.title);
+
       const response = await ai.models.generateContent({
-        model: 'gemini-3-flash-preview',
-        contents: `Escreva uma descrição de escopo de projeto comercial profissional, detalhada e persuasiva para um projeto com o título: "${editorData.title}". Foque nos entregáveis e valor agregado. Limite a 3 parágrafos.`,
+        model,
+        contents: prompt,
       });
 
       if (response.text) {

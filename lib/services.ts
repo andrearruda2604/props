@@ -291,7 +291,10 @@ export const SettingsService = {
             nextProposalSeq: data.next_proposal_seq,
             useDatePrefix: data.use_date_prefix,
             receiptTermText: data.receipt_term_text,
-            receiptFooterText: data.receipt_footer_text
+            receiptFooterText: data.receipt_footer_text,
+            aiApiKey: data.ai_api_key,
+            aiModel: data.ai_model,
+            aiPrompt: data.ai_prompt
         } as CompanySettings;
     },
 
@@ -312,7 +315,10 @@ export const SettingsService = {
             next_proposal_seq: settings.nextProposalSeq,
             use_date_prefix: settings.useDatePrefix,
             receipt_term_text: settings.receiptTermText,
-            receipt_footer_text: settings.receiptFooterText
+            receipt_footer_text: settings.receiptFooterText,
+            ai_api_key: settings.aiApiKey,
+            ai_model: settings.aiModel,
+            ai_prompt: settings.aiPrompt
         };
 
 
